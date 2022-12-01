@@ -18,7 +18,29 @@
   <h2>
     <a href="/users?action=create">Add New User</a>
   </h2>
+  <form action="" method="get">
+    <table>
+      <tr>
+        <td>
+          <input type="text" name="search" id="search" placeholder="Search">
+        </td>
+        <td>
+          <input type="submit" value="Search">
+        </td>
+      </tr>
+    </table>
+  </form>
+  <form action="" method="get">
+    <table>
+      <tr>
+        <td>
+          <input type="submit" value="sort by name" name="sort">
+        </td>
+      </tr>
+    </table>
+  </form>
 </center>
+
 <div align="center">
   <table border="1" cellpadding="5">
     <caption><h2>List of Users</h2></caption>
@@ -43,5 +65,6 @@
     </c:forEach>
   </table>
 </div>
+
 </body>
 </html>

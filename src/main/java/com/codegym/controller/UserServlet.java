@@ -46,6 +46,7 @@ public class UserServlet extends HttpServlet {
         }
     }
 
+
     private void deleteUser(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
         int id = Integer.parseInt(request.getParameter("id"));
         userDAO.deleteUser(id);
@@ -70,7 +71,17 @@ public class UserServlet extends HttpServlet {
     }
 
     private void listUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<User> listUser = userDAO.selectAllUsers();
+        String search = request.getParameter("search");
+        String sort = request.getParameter("sort");
+        List<User> listUser;
+        if (search == null && sort == null) {
+            listUser = userDAO.selectAllUsers();
+        } else if (search != null){
+            listUser = userDAO.searchByCountry(search);
+        } else {
+            listUser = userDAO.sortBYName();
+        }
+
         request.setAttribute("listUser", listUser);
         RequestDispatcher dispatcher = request.getRequestDispatcher("user/list.jsp");
         dispatcher.forward(request, response);
