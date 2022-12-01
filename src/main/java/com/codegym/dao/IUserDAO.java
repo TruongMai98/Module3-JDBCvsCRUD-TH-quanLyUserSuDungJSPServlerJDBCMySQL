@@ -18,4 +18,6 @@ public interface IUserDAO {
 
     List<User> searchByCountry(String country);
     List<User> sortBYName();
+    User getUserById(int id);
+    void insertUserStore(User user);
 }
