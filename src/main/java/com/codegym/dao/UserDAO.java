@@ -332,4 +332,83 @@ public class UserDAO implements IUserDAO {
             e.printStackTrace();
         }
     }
+
+    @Override
+    public void insertUpdateUseTransaction() {
+        try (Connection connection = getConnection();
+
+             Statement statement = connection.createStatement();
+
+             PreparedStatement preparedStatementInsert = connection.prepareStatement(SQL_INSERT);
+
+             PreparedStatement preparedStatementUpdate = connection.prepareStatement(SQL_UPDATE)) {
+
+            statement.execute(SQL_TABLE_DROP);
+
+            statement.execute(SQL_TABLE_CREATE);
+
+            // start transaction block
+
+            connection.setAutoCommit(false); // default true
+
+            // Run list of insert commands
+
+            preparedStatementInsert.setString(1, "Quynh");
+
+            preparedStatementInsert.setBigDecimal(2, new BigDecimal(10));
+
+            preparedStatementInsert.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+
+            preparedStatementInsert.execute();
+
+
+
+            preparedStatementInsert.setString(1, "Ngan");
+
+            preparedStatementInsert.setBigDecimal(2, new BigDecimal(20));
+
+            preparedStatementInsert.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+
+            preparedStatementInsert.execute();
+
+
+
+            // Run list of update commands
+
+
+
+            // below line caused error, test transaction
+
+            // org.postgresql.util.PSQLException: No value specified for parameter 1.
+
+            preparedStatementUpdate.setBigDecimal(1, new BigDecimal(999.99));
+
+
+
+            //preparedStatementUpdate.setBigDecimal(1, new BigDecimal(999.99));
+
+            preparedStatementUpdate.setString(2, "Quynh");
+
+            preparedStatementUpdate.execute();
+
+
+
+            // end transaction block, commit changes
+
+            connection.commit();
+
+            // good practice to set it back to default true
+
+            connection.setAutoCommit(false);
+
+
+
+        } catch (Exception e) {
+
+            System.out.println(e.getMessage());
+
+            e.printStackTrace();
+
+        }
+    }
 }

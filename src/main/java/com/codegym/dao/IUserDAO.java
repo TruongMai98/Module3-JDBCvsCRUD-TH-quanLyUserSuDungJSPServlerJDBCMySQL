@@ -28,4 +28,6 @@ public interface IUserDAO {
 
     void  insertUpdateWithoutTransaction();
 
+    void insertUpdateUseTransaction();
+
 }
