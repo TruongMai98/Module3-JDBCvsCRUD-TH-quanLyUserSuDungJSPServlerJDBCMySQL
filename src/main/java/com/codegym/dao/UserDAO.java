@@ -102,7 +102,7 @@ public class UserDAO implements IUserDAO {
 
              // Step 2:Create a statement using connection object
 
-            PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_USERS);) {
+             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_USERS);) {
             System.out.println(preparedStatement);
             // Step 3: Execute the query or update query
             ResultSet rs = preparedStatement.executeQuery();
@@ -149,7 +149,7 @@ public class UserDAO implements IUserDAO {
     public List<User> searchByCountry(String country) {
         List<User> newUser = new ArrayList<>();
         try (Connection connection = getConnection();
-        PreparedStatement preparedStatement = connection.prepareStatement(SEARCH_BY_COUNTRY)){
+             PreparedStatement preparedStatement = connection.prepareStatement(SEARCH_BY_COUNTRY)) {
             preparedStatement.setString(1, country);
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -170,7 +170,7 @@ public class UserDAO implements IUserDAO {
     public List<User> sortBYName() {
         List<User> userList = new ArrayList<>();
         try (Connection connection = getConnection();
-        PreparedStatement preparedStatement = connection.prepareStatement(SORT_BY_NAME)){
+             PreparedStatement preparedStatement = connection.prepareStatement(SORT_BY_NAME)) {
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 int id = resultSet.getInt("id");
@@ -191,7 +191,7 @@ public class UserDAO implements IUserDAO {
         User user = null;
         String query = "{call get_user_by_id(?)}";
         try (Connection connection = getConnection();
-        CallableStatement callableStatement = connection.prepareCall(query)){
+             CallableStatement callableStatement = connection.prepareCall(query)) {
             callableStatement.setInt(1, id);
             ResultSet resultSet = callableStatement.executeQuery();
             while (resultSet.next()) {
@@ -207,10 +207,10 @@ public class UserDAO implements IUserDAO {
     }
 
     @Override
-    public void insertUserStore(User user){
+    public void insertUserStore(User user) {
         String query = "{call insert_user(?,?,?)}";
         try (Connection connection = getConnection();
-        CallableStatement callableStatement = connection.prepareCall(query)){
+             CallableStatement callableStatement = connection.prepareCall(query)) {
             callableStatement.setString(1, user.getName());
             callableStatement.setString(2, user.getEmail());
             callableStatement.setString(3, user.getCountry());
@@ -218,6 +218,74 @@ public class UserDAO implements IUserDAO {
             callableStatement.executeUpdate();
         } catch (SQLException e) {
             printSQLException(e);
+        }
+    }
+
+    @Override
+    public void addUserTransaction(User user, int[] permission) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        PreparedStatement preparedStatementAssignment = null;
+        ResultSet resultSet = null;
+
+        try {
+            connection = getConnection();
+            connection.setAutoCommit(false);
+
+            preparedStatement = connection.prepareStatement(INSERT_USERS_SQL, Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.setString(1, user.getName());
+            preparedStatement.setString(2, user.getEmail());
+            preparedStatement.setString(3, user.getCountry());
+            int rowAffected = preparedStatement.executeUpdate();
+
+            resultSet = preparedStatement.getGeneratedKeys();
+            int userId = 0;
+            if (resultSet.next()) {
+                userId = resultSet.getInt(1);
+            }
+
+            if (rowAffected == 1) {
+                String sqlPivot = "insert into user_permision(user_id, permision_id)" + "values(?,?)";
+                preparedStatementAssignment = connection.prepareStatement(sqlPivot);
+                for (int permisionId : permission) {
+                    preparedStatementAssignment.setInt(1, userId);
+                    preparedStatementAssignment.setInt(2, permisionId);
+                    preparedStatementAssignment.executeUpdate();
+                }
+                connection.commit();
+            } else {
+                connection.rollback();
+            }
+        } catch (SQLException ex) {
+            try {
+                if (connection != null)
+
+                    connection.rollback();
+
+            } catch (SQLException e) {
+
+                System.out.println(e.getMessage());
+
+            }
+
+            System.out.println(ex.getMessage());
+        } finally {
+            try {
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+                if (preparedStatement != null) {
+                    preparedStatement.close();
+                }
+                if (preparedStatementAssignment != null) {
+                    preparedStatementAssignment.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
         }
     }
 }

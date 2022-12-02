@@ -18,6 +18,9 @@
   <h2>
     <a href="/users?action=create">Add New User</a>
   </h2>
+  <h3>
+    <a href="/users?action=permision">permision</a>
+  </h3>
   <form action="" method="get">
     <table>
       <tr>

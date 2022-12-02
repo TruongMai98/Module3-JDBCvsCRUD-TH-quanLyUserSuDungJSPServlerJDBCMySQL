@@ -20,4 +20,5 @@ public interface IUserDAO {
     List<User> sortBYName();
     User getUserById(int id);
     void insertUserStore(User user);
+    void addUserTransaction(User user, int[] permission);
 }
