@@ -2,7 +2,9 @@ package com.codegym.dao;
 
 import com.codegym.model.User;
 
+import java.math.BigDecimal;
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +20,17 @@ public class UserDAO implements IUserDAO {
     private static final String UPDATE_USERS_SQL = "update users set name = ?,email= ?, country =? where id = ?;";
     private static final String SEARCH_BY_COUNTRY = "select * from users where country like ? '%'";
     private static final String SORT_BY_NAME = "select * from users order by name";
-
+    private static  final String SQL_INSERT = "insert into employee (name, salary, created_date) values(?, ?, ?)";
+    private static final String SQL_UPDATE = "update employee set salary = ? where name = ?";
+    private static final String SQL_TABLE_CREATE = "create table employee" +
+            "(" +
+            "id serial, " +
+            "name varchar(100) not null, " +
+            "salary numeric(15, 2) not null," +
+            "created_date timestamp," +
+            "primary key (id)" +
+            ")";
+    private static final String SQL_TABLE_DROP = "drop table if exists employee";
     public UserDAO() {
     }
 
@@ -239,6 +251,10 @@ public class UserDAO implements IUserDAO {
             int rowAffected = preparedStatement.executeUpdate();
 
             resultSet = preparedStatement.getGeneratedKeys();
+
+            System.out.println("rs: "+resultSet.getInt(1));
+            System.out.println("rs: "+resultSet.getInt(0));
+            System.out.println("rs: "+resultSet.getInt(2));
             int userId = 0;
             if (resultSet.next()) {
                 userId = resultSet.getInt(1);
@@ -286,6 +302,34 @@ public class UserDAO implements IUserDAO {
             } catch (SQLException e) {
                 System.out.println(e.getMessage());
             }
+        }
+    }
+
+    @Override
+    public void insertUpdateWithoutTransaction() {
+        try (Connection connection = getConnection();
+        Statement statement = connection.createStatement();
+        PreparedStatement preparedStatementInsert = connection.prepareStatement(SQL_INSERT);
+        PreparedStatement preparedStatementUpdate = connection.prepareStatement(SQL_UPDATE)){
+            statement.execute(SQL_TABLE_DROP);
+            statement.execute(SQL_TABLE_CREATE);
+
+            preparedStatementInsert.setString(1, "quynh");
+            preparedStatementInsert.setBigDecimal(2, new BigDecimal(10));
+            preparedStatementInsert.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+            preparedStatementInsert.execute();
+
+            preparedStatementInsert.setString(1, "ngan");
+            preparedStatementInsert.setBigDecimal(2, new BigDecimal(20));
+            preparedStatementInsert.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+            preparedStatementInsert.execute();
+
+            preparedStatementUpdate.setBigDecimal(2, new BigDecimal("999.99"));
+            preparedStatementUpdate.setString(2, "quynh");
+            preparedStatementUpdate.execute();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 }

@@ -21,6 +21,9 @@
   <h3>
     <a href="/users?action=permision">permision</a>
   </h3>
+  <h3>
+    <a href="/users?action=test-without-tran">test-without-tran</a>
+  </h3>
   <form action="" method="get">
     <table>
       <tr>
